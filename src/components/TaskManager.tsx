@@ -2,6 +2,7 @@ import { nanoid } from "../../node_modules/nanoid/index";
 import { useState } from "react";
 import "./TaskManager.css";
 import * as React from 'react';
+import useTaskManager from "./useTaskManager";
 
 interface Task{
   id: string,
@@ -12,44 +13,13 @@ interface Task{
 export const TaskManager = () => {
   const [title, setTitle] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [tasks, setTasks] = useState<Task[]>([]);
-
-  // remove task from list
-  const completeTask = (id: string) => {
-    setTasks(tasks.filter((task) => task.id !== id));
-  };
-
-  const updateTask = (id: string, taskUpdate: Partial<Task>) => {
-    const newTasks = tasks.slice();
-
-    const index = tasks.findIndex((task) => task.id === id);
-
-    newTasks[index] = {...newTasks[index], ...taskUpdate};
-
-    setTasks(newTasks);
-  };
-
-  const addTask = () => {
-    if (title.length < 1) {
-      return;
-    }
-
-    const newTask: Task = {
-      // using nanoid to generate unique id
-      id: nanoid(),
-      title,
-    };
-    setTasks((prev) => prev.concat(newTask));
-    setTitle("");
-  };
+  const {tasks, addTask, completeTask, updateTask, filterTasks} = useTaskManager();
 
   const handleSearch = (ev: React.ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(ev.target.value);
   };
 
-  const filteredTasks = tasks.filter((task) =>
-    task.title.toLowerCase().includes(searchKeyword.toLowerCase()),
-  );
+  const filteredTasks = filterTasks(searchKeyword);
 
   return  (
     <div className="container">
@@ -68,7 +38,7 @@ export const TaskManager = () => {
           }}
         />
 
-        <button onClick={addTask}>Add Task</button>
+        <button onClick={() => addTask(title)}>Add Task</button>
       </div>
 
       <ul className="container">
@@ -88,5 +58,6 @@ export const TaskManager = () => {
       </ul>
     </div>
   );
+
 
 };
